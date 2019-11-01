@@ -1,0 +1,316 @@
+
+
+Abstract. Text summarization consists in generating a shorter version
+of an input document, which captures its main ideas. Despite the recent
+developments in this area, most of the existing techniques have been
+tested mostly in English and Chinese, due in part to the low availability
+of datasets in other languages. In addition, experiments have been run
+mostly on collections of news articles, which could lead to some bias in
+the research. In this paper, we address both these limitations by creating
+a dataset for the summarization of legal texts in Portuguese. The dataset,
+called RulingBR, contains about 10K rulings from the Brazilian Federal
+Supreme Court. We describe how the dataset was assembled and we also
+report on the results of standard summarization methods which may
+serve as a baseline for future works.
+Keywords: Summarization
+
+Text summarization is an important task in Natural Language Processing. It
+consists in generating a shorter version of the text given as input, capturing
+its main ideas. In the last few years, summarization has undergone signiﬁcant developments. Notably, many of the new techniques being applied rely on
+deep learning strategies to go beyond the previously established state-of-the-art
+results [19,22,25,26]. Despite the recent boom in this area, the majority of works
+have been using English and Chinese datasets due in part to the low availability
+of resources in other languages.
+Another limitation of the current research is that it focuses on news articles,
+for which the task consists in generating the headline or a very short summary.
+For example, models trained on the DUC-2004 task can only generate summaries
+of up to 75 characters [14,19], and the input consists of only one or two sentences.
+News articles usually begin with a teaser sentence used as a catch for the
+reader, which sums up the contents of the full article. So, the task of guessing
+the title can generally obtain good results by simply extracting the ﬁrst few
+words of the article. The excessive focus on this type of text introduces bias in
+the techniques being developed. For example, Google’s Textsum model [24] for
+c Springer Nature Switzerland AG 2018
+
+summarization uses just the ﬁrst two paragraphs of the article. Another possible
+approach is to weight the sentences in descending order from the start, in favor
+of the ﬁrst few sentences [23].
+We believe there is a need for datasets with diﬀerent text styles and longer
+summaries with contents taken from several parts of the input. This would allow
+a more realistic setting and potential for employing summarization in a wider
+set of applications.
+In this paper, we report on the creation of RulingBR – a dataset for the
+summarization of legal texts in Portuguese containing over 10K decisions from
+the Brazilian Federal Supreme Court. Our contribution aims at addressing two
+limitations of the research in summarization: (i) the low availability of resources
+for languages other than English and Chinese, and (ii) the excessive focus on
+summarizing news articles. We have assembled a language resource in Portuguese
+to enable the development of methods for this language. The second contribution
+is to do with the style of the texts, which will contribute to a greater variety in
+the research on summarization.
+
+2
+
+Related Work
+
+There are a few datasets that have been used for evaluating summarization techniques on generic domains. The following are available in Brazilian Portuguese.
+TeM´
+ario [17] is composed of 100 news articles. Each text contains a pair of
+reference summaries: one was made by a human an the other was automatically generated.
+Summ-it [6] is an annotated corpus that contains anaphoric coreferences. These
+are newspaper articles annotated from the Brazilian Folha de S˜
+ao Paulo
+newspaper.
+CSTNews [1] is another annotated corpus. It is composed of 50 text collections
+below.
+The Annotated Gigaword [18] is the largest static corpus of English news
+documents available [15]. It contains over 10 million documents from seven
+news sources, annotated with syntactic and discourse structure. It was not
+speciﬁcally built to be a summarization dataset, but it has been used for this
+purpose by simulating that the headline would be a summary of the article.
+CNN/Daily Mail was purposely designed for summarization as each article
+comes paired with a short set of summarized bullet points that represent the
+highlights of the text. It is frequently used for question answering [5] and is
+composed of about 300 thousand articles.
+
+RulingBR: A Summarization Dataset for Legal Texts
+
+
+Opinosis [8] contains customer reviews about a product they bought. Each
+product description has ﬁve reviews. This is a small dataset containing only
+51 articles.
+DUC1 stands for Document Understanding Conference. It has run a speciﬁc
+summarization track since 2001. In 2008, DUC became a summarization track
+inside the Text Analysis Conferences (TAC). These datasets contain humanproduced per-document and multiple document summaries.
+RulingBR diﬀers from these related datasets because in the legal domain,
+documents are generally lengthier and their structure is very diﬀerent from
+the structure of news articles. As a consequence, the assumption that the most
+important ideas will be in the ﬁrst few sentences is not valid.
+
+A Summarization Dataset with Legal Documents
+
+For the purpose of text summarization in the legal domain, we searched for a
+source with a large number of publicly available documents. Thus, we chose to use
+the Supremo Tribunal Federal (STF) as our source. The STF is the highest court
+in Brazil and has the ﬁnal word interpreting the country’s Federal Constitution.
+All of its decisions must be published online and are available in its internet
+portal2 .
+3.1
+
+Structure of the Documents
+
+The full decision document, called (inteiro teor ), is composed of four parts,
+– The Ementa is a brief summary of the main topics discussed in each case
+and how the judges decided. We will be using the Ementa as the reference
+summary that automatic methods should aim to produce. In our corpus, the
+size of the Ementa was typically around 7% of the size of the full content.
+– The Ac´
+ord˜
+ao is a brief description of how each judge has decided and what
+the ﬁnal decision was. This section represents around 2% of the full content.
+– The Relat´
+orio, meaning report, is a compilation of the main arguments and
+events that happened during the trial. In general, this section accounts for
+about 22% of the full content.
+– The last section, called Voto, may contain one vote, in case that the other
+judges agree with the ﬁrst judge, or individual votes for each judge, otherwise.
+Because the votes need to address all the points raised by the petitioners, this
+tends to be the largest section covering around 69% of the full content.
+The Ementa is useful for lawyers and other legal professionals when they
+are searching for decisions about a given topic. A good text should not be long,
+generally less than one page, making it a good summary of the full decision.
+
+Data Collection
+
+In order to obtain the documents, the Scrapy [21] library was used to browse
+the search pages and to download the documents. Only a few documents from
+the years 2010 and 2011 could be successfully parsed. Thus most documents are
+dated from 2012 to 2018.
+The raw text we obtained contains some undesired pieces of texts such as
+headings, footers, page numbers, etc. We used regular expressions to identify the
+starting and ending points of each section of interest and remove unwanted text.
+Finally, the text of the sections was dumped as a JSON object, one object per
+line.
+In Fig. 1, we show an extract from a short document in the ﬁnal JSON format.
+The ellipsis indicates the omission of content to save space.
+The ﬁnal ﬁle has about 173 MB and contains 10,623 decisions and can
+be downloaded from https://github.com/diego-feijo/rulingbr. There are around
+26 million tokens in the entire dataset.
+We investigated whether there is a correlation between the length (in tokens)
+of the Ementa section and all other sections combined (full document). This
+correlation would be important for us to determine the desired summary size
+when using the automatic summarizers. The calculated correlation coeﬃcient
+was 0.39, which is considered weak and is reﬂected by a large dispersion.
+
+4
+
+Evaluating Summarization Systems on RulingBR
+
+In this Section, we present results of out-of-the-box extractive summarization
+strategies on RulingBR dataset. The goal is to provide baseline results for future
+summarization techniques.
+4.1
+
+Experimental Setup
+
+In order to establish some baselines using this corpus, we have run a few automatic summarization experiments using two common libraries.
+
+RulingBR: A Summarization Dataset for Legal Texts
+
+259
+
+The ﬁrst library used was Gensim [20]. This is a software framework for Natural Language Processing that implements some popular algorithms for topical
+inference and has a TextRank implementation for summarization. This library
+implements a variation of the TextRank [13] algorithm.
+The second library used was the Sumy package [3]. It has a large variety of
+algorithms implemented using a common interface which makes it easier to run
+and compare the results.
+The choice of summarization algorithms was motivated by the fact that they
+could be applied directly to the text without requiring additional information
+such as part-of-speech tags or headlines.
+The algorithms used in this experiment were the following.
+TextRank uses a graph-based ranking model for text processing. This algorithm
+applies unsupervised methods for keyword and sentence extraction and is
+based on ideas borrowed from HITS [10] and PageRank [16]. Both Gensim
+and Sumy implement variations of the TextRank algorithm. The Gensim
+implementation was improved [2] replacing the cosine by the Okapi-BM25
+similarity function.
+Luhn [12], which uses statistical information derived from word frequency and
+distribution to compute a relative measure of signiﬁcance, ﬁrst for words and
+then for sentences. The set of sentences with the highest scores are extracted
+to make up the summary.
+LexRank [7] is a graph-based method to compute a relative measure of importance which is based on the concept of eigenvector centrality in a graph representation of the sentences. In this model, a connectivity matrix based on
+intra-sentence cosine similarity is used as the adjacency matrix for the graph
+representation of sentences.
+4.2
+
+Evaluation Metrics
+
+The most commonly used metric for evaluating summarization algorithms is
+Rouge [11], which stands for Recall-Oriented Understudy for Gisting Evaluation. Its goal is to provide a measure of quality of an automatically generated
+summaries in comparison against a reference summary produced by humans.
+The Rouge metric checks for overlapping text segments between the automatically generated summary and the reference summary. Diﬀerent levels of granularity can be used. Rouge-1 counts the occurrences unigrams that appear in
+the automatically generated and the reference summaries. Rouge-2, counts how
+many bigrams were found (in the same order). Rouge-L stands for the longest
+common sub-sequence between the automatically generated and the reference
+summaries.
+4.3
+
+Experimental Procedure
+
+Although both libraries used in the experiments support stopword removal, stemming, and tokenization, we opted to apply it beforehand as preprocessing steps
+
+260
+
+D. de Vargas Feij´
+o and V. P. Moreira
+
+to make sure that the same operations were applied in all settings. For most
+of the stages, we have used the Natural Language Toolkit (NLTK) [4], which
+is a widely used library for processing of natural language documents. It contains functions and trained models in many languages. We used this library for
+ﬁltering, stemming, and tokenization.
+Stopword Removal – In order to try to make a fair analysis of the content produced in the summaries, stopwords should be removed since their presence could
+artiﬁcially inﬂate the quality metrics (since the reference summaries would certainly contain many such words). We have used the Portuguese stop-list provided
+with NLTK. Also, we have ﬁltered any token with fewer than two characters.
+This was done because these tokens have low discrimination power, and, as we
+are generating a summary, we expect that the words should contain relevant
+semantic meaning.
+Stemming – This technique conﬂates the variant forms of words into a single
+stem. We used the NLTK implementation of the RSLP-Stemmer [9].
+Tokenization – This is the task of separating the text into chunks. It is used for
+dividing the text into sentences and them into words. Recognizing the start and
+end of sentences is crucial for the extractive summarization algorithms because
+they will compute the score of each sentence and output the highest scored
+sentences. The tokenizer must identify situations such as when sentences were
+not being ﬁnished by a period (e.g. Hurry up!) or when a period was being used
+for an abbreviation (e.g. Mr. John) rather than to indicate the end of a sentence.
+Again, we used the NLTK implementation of the Punkt tokenizer trained for the
+Portuguese language.
+Standardization – The documents in the corpus signiﬁcantly vary in length
+due to the several subjects that are covered by the decisions. In order to try to
+generalize a pattern, some outliers needed to be dropped. Using a token (word)
+as measuring unit, we calculated the mean and the standard deviation for the
+summaries (99.53 ± 91.17) and for the full contents (1397.44 ± 2101.73). In
+order to reduce the dispersion, we removed outliers. Input documents with fewer
+than 300 words or more than the mean plus 3 times the standard deviation were
+treated as outliers. In a similar fashion, summaries with fewer than 19 words
+or more than the mean plus 3 times the standard deviation were also removed.
+With this standardization, we removed 616 decisions, which represent 5.80%
+of the total. Full contents mean became 1200.65, with a standard deviation
+of 893.86; Summary mean became 91.79, with a standard deviation of 62.92.
+The frequency distribution after the cleaning can be seen in the histograms
+of Fig. 2.
+4.4
+
+Model Parameters
+
+It is important to notice that the evaluation scores could be aﬀected by the size
+of the generated summaries. That happens because a longer summary would
+probably have a greater recall and, as consequence, a higher Rouge score.
+
+RulingBR: A Summarization Dataset for Legal Texts
+
+261
+
+Fig. 2. Frequency distribution of the length of the summaries and the full content of
+the documents.
+
+The libraries that generate automatic summaries receive as parameter the
+size of the desired output. As we discussed earlier, there is no strong correlation
+between the length of the document and the length of the summary. As shown
+in the histograms of Fig. 2, the size of the reference summaries can vary roughly
+between 30 and 150 tokens. So, setting the desired summary size to a ﬁxed value
+will introduce an error as the size will be diﬀerent from the size of reference
+summary. Nevertheless, we had to stick to a ﬁxed size.
+In these libraries, the output is entire sentences, so the total of words can be
+much smaller or larger than the desired output size. For example, the Gensim
+library receives the number of desired words, it computes the best sentences and
+will append them to the output until the diﬀerence between the desired output
+and the generated output is minimized. The Sumy library receives only the
+number of desired sentences, so the output may have a size completely diﬀerent
+from the size of the reference summary (either much larger or much smaller).
+In our dataset, sentence length can vary a lot. It is possible to ﬁnd oneword sentences and sentences with a few hundred words. So, it is fairer to run
+our experiments with diﬀerent size parameters. This way the results are not
+negatively impacted by an arbitrary choice of size.
+4.5
+
+Results
+
+A higher Rouge score reﬂects a higher similarity between the automatically generated summary and the reference summary. Our goal when running this evaluation is to establish how standard extractive algorithms perform on this dataset.
+We have no intent in comparing those algorithms, as this would require evaluations under many diﬀerent contexts and parameters.
+As Table 1 shows, Rouge F-Score and Recall increase when the summary is
+longer. So, for a fair comparison, we used the scores of the runs in which the
+absolute diﬀerences between the length of the generated summary and its reference is minimized. Figure 3 shows the scores for Gensim using the desired output
+of 80 words, Luhn’s algorithm with a ﬁxed output of one sentence, LexRank and
+TextRank algorithms with a ﬁxed output of two sentences.
+D. de Vargas Feij´
+o and V. P. Moreira
+
+In our experiments, the Gensim library generally performed slightly better.
+But, the highest Rouge-1 F-Score was obtained using the LexRank asking for
+four sentences in the Sumy library.
+Table 1. Results of the summarization using diﬀerent lengths of outputs. Best results
+per metric are shown in bold.
+Algorithm Length Abs Dif
+
+In this paper, we presented the RulingBR dataset, a corpus that can be used
+for natural language summarization. It diﬀers from the existing corpora because
+it covers the legal domain and it is in Portuguese. We have analyzed diﬀerent
+aspects of the dataset such as its organization, the size of each section, and how
+it can be used for the summarization task. We ran an experiment using diﬀerent
+algorithms and libraries to establish baseline summarization results.
+Despite the fact that the Ementa is a useful summary for legal professionals,
+it is not clear that the traditional general approaches for summarization could be
+directly applied to the legal domain producing texts that cover the same topics
+that a human would select.
+The desired summary should contain the main topics discussed in the text.
+Perhaps, the desired output summary could be improved by appending these
+main topics, named entities, and compound terms. Also, we observed that the
+summary is composed of the ﬁnal part of the Ac´
+ord˜
+ao, the topics taken from the
+Relat´
+orio, and several ideas discussed in the Voto.
+As a future work, we intend to test Neural models for summarization in order
+to identify the relevant aspects of the document and generate a summary in the
+style produced by a human.

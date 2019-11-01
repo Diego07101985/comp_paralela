@@ -1,0 +1,424 @@
+
+
+Abstract. Huge annotated corpora are relevant for many Natural Language Processing tasks such as Sentiment Analysis. However, a manual
+and more precise annotation is always costly and becomes prohibitive
+when the corpus is too large. This paper presents a semi-supervised learning based framework for extending sentiment annotated corpora with
+unlabeled data, named CasSUL. The framework was used to extend in
+eight times TTsBR, a corpus of 15.000 tweets in Brazilian Portuguese
+manually annotated in three polarity classes. The extended annotated
+corpus was used to train several polarity classiﬁers and the results show
+that some combinations of classiﬁer and features can preserve the annotation quality of the original corpus in the resulting corpus.
+Keywords: Corpus annotation
+Sentiment analysis
+
+
+· Semi-supervised learning
+
+Introduction
+
+Several tasks in Natural Language Processing (NLP) require annotated datasets,
+or corpora, for training and evaluating methods and comparing diﬀerent systems.
+The process of manual annotation of corpora, although precise, is usually costly
+and becomes prohibitive when scaled to larger datasets. For popular tasks on
+NLP, such as Sentiment Analysis (SA), the study that analyzes people’s opinions,
+sentiments, evaluations, appraisals, attitudes, and emotions towards entities [10],
+we can ﬁnd widely used corpora that serve as baselines for novel methods and
+approaches proposed for the task. Two examples are the Stanford Sentiment
+Treebank [21] and SemEval datasets [13] that are used for evaluating state-ofthe-art models due to the reliability of the annotation and to the large number
+of labeled documents.
+For Brazilian Portuguese we can ﬁnd in the literature several corpora for the
+same task, but the high costs with manual annotation limit the resources to be
+either small or obtained trough entirely automatic methods such as user scores in
+websites or using semantic tips such as presence/absence of emoticons. Furthermore the data presented in these corpora may become outdated, incomplete or
+c Springer Nature Switzerland AG 2018
+
+do not be large enough for machine learning approaches, such as Deep Learning
+architectures, that rely on larger datasets for generalizing classiﬁcation.
+In this paper we introduce CasSUL, a semi-supervised framework annotating
+sentiment corpora using a small portion of annotated data and extending it with
+a large set of unlabeled documents, reducing human eﬀort on annotation and
+providing a middle-ground between manual and automatic labeling of a large
+dataset.
+
+2
+
+Related Work
+
+The creation of datasets for SA was largely addressed in the literature. Several
+authors have made eﬀorts in using automatic labeling methods for creating SA
+corpora due to the challenges involved in the manual annotation – hiring and
+training annotators; measuring agreement between annotators; writing guidelines; developing interfaces; and more.
+In some domains, such as product reviews, users give scores (sometimes
+grades or stars) for evaluating the target material. Previous works in SA used
+these scores for automatic identifying positive and negative reviews [16,22]. For
+Portuguese, some authors followed same approach for creating large datasets,
+such as Buscap´e and Mercado Livre [2,9].
+With the growth of social networks and blogs, the number of available data for
+NLP studies has grown as well, but despite the high volume of data these websites
+usually do not contain score based systems as the previous. One alternative is
+to use Distant Supervision, which is the selection of a consistent feature for
+identifying semantic orientation in texts. [8] adopted emoticons for this task on
+Twitter, using a selection of positive emoticons and negative emoticons. This
+approach performs well for two classes and has been used by other researches [5,
+15]. One of the weaknesses of this method is that it removes an important feature
+from the dataset, the emojis; and it is also limited to binary classiﬁcation only,
+since deﬁning any sentence without emojis neutral would add too much noise
+and it is hard to form a list of neutral emoticons.
+On the other hand, semi-supervised approaches have been shown eﬀective for
+improving classiﬁers using unlabeled data for sentiment analysis [6,19,20]. The
+results using self-training, an iterative method of adding classiﬁed documents
+to the training subset, have improved the classiﬁcation. This has motivated the
+framework described below.
+
+The CasSUL Framework
+
+We propose a semi-supervised approach for labeling sentiment corpora, named
+CasSUL. This was implemented as a self-training iterative framework following
+Fig. 1. CasSUL input is a small dataset of manual labeled documents and a larger
+set of unlabeled documents. The main goal is to use machine learning classiﬁers
+for training models and iteratively increase the labeled documents using reliable
+classiﬁed data.
+
+Semi-supervised Sentiment Annotation of Large Corpora
+
+Initially we use a manually annotated dataset for training a sentiment classiﬁcation model. This model is used for predicting labels for the unlabeled documents. We use the probability of the predicted labels for ranking the unlabeled documents by the most reliable. In each iteration we add a subset of
+these data (the most reliable) to the initial dataset, thus increasing its size and
+re-classifying the remaining unlabeled data each time. We manually set a percentage of data (the threshold shown in Fig. 1) deﬁning how many documents
+will be added to the training set in each iteration. For example, a threshold of
+0.05 will add ﬁve percent of the documents in each iteration resulting in twenty
+iterations.
+
+Fig. 1. CasSUL: a semi-supervised framework for corpus annotation.
+
+The intuition behind CasSUL is that manual annotation is necessary in subjective tasks such as SA and should be part of the process. Besides that the
+iterative addition of new samples provide new information for the classiﬁers,
+thus resulting in better classiﬁcation models for labeling the remaining unlabeled data.
+CasSUL diﬀers from other semi-supervised approaches presented in the literature [6,19,20]. Usually the authors use a percentage based on the conﬁdence
+level (eg. only documents with 90% of conﬁdence will be added to the training
+dataset). We have modiﬁed that since we addressed sentiment classiﬁcation in
+three classes using unbalanced corpora as main resource. Preliminary experiments showed that classiﬁers trained with skewed data learned biased models
+and the majority class usually overcame the others, propagating the bias even
+more. Moreover, the use of this approach in three class classiﬁcation was challenging since high values of conﬁdence resulted in iterations adding just a few
+documents and ﬁnishing the run in ﬁve or less steps. The same issue remained
+even with lower conﬁdence values.
+
+
+The experiments demanded a SA corpus in Brazilian Portuguese manually annotated and even though the literature oﬀers several datasets for the task, they
+are either too small, or present strong unbalanced class distribution, or did not
+go through a reliable evaluation of the annotation process. We compiled and
+manually annotated a Brazilian Portuguese dataset of TV show commentaries
+from Twitter for our main experiments – the TweetSentBR (TTsBR) [4]. The
+corpus contains 15.000 tweets labeled in three classes and is split in train/test,
+12.999 and 2.001 tweets, respectively.
+For the experiments we used the same queries for creating TTsBR and
+extracted new data (117.050 documents) to be used as the unlabeled dataset.
+Since this dataset does not have manual annotation, we compared results
+achieved by models trained with TTsBR train set to the ones obtained with
+the CasSUL extended corpus (TTsBR train + unlabeled data) both predicting
+the TTsBR test set.
+We also evaluated CasSUL framework using other corpora: Buscape, Mercado
+Livre and Brazilian Elections. Since we do not have a complete deﬁnition of the
+data we could not extract new documents for experiments so we only used the
+available data. Buscape is a product review corpus that contains 13.685 documents labeled with positive or negative tags [9]. Mercado Livre is also a product
+review corpus containing 43.818 documents also labeled in two classes [2]. Both of
+them are balanced corpora automatically labeled using scores provided by users.
+Brazilian Elections is a two-set tweet corpus about two running candidates for
+presidency in 2010 Brazilian Elections, Dilma and Serra [17]. The ﬁrst set contains 66.643 documents and the second, 9.718. Both corpora are annotated in
+two classes and unbalanced.
+Another dataset we used in our experiments is Pelesent [5]. The corpus was
+created through distant supervision using emojis and emoticons. It contains
+980.067 tweets automatically labeled in two classes and unbalanced. We performed experiments evaluating models trained with Pelesent and with the CasSUL extended corpus.
+3.2
+
+Data Representation and Classification
+
+Before running the experiments we preprocessed all the data tokenizing the documents, removing punctuation marks and symbols (we kept emojis and emoticons), replacing user names and urls (for the tags USER and URL) and mapping
+character repetitions, such as in “I looooove Star Wars.” normalized to“I loove
+Star Wars.” (keeping some clue of repetition is importante since it carries semantic information). The preprocessing was made using Enelvo [3], an NLP tool for
+normalization developed for Brazilian Portuguese.
+For handling the data two forms of representation were used: word embeddings and a feature approach. The word embeddings used in this work are
+shown in [5] and were trained with 14 million tweets using word2vec [11] in two
+approaches - a 50-dimension skip-gram trained model and a 600-dimension c-bow
+
+Semi-supervised Sentiment Annotation of Large Corpora
+trained model. The feature representation is based on six literature approaches:
+(a) Bag-of-words: a unigram bag-of-words with occurrence of terms. This
+method is quite usual in SA [1,2]. (b) Negation words: using a negation
+word list for Brazilian Portuguese, as proposed in [2]. We count the number
+of negation (such as “no”,“never ” and “nothing”) and append it to the data
+representation. (c) Emoticons: Emoticons are an enriched representation of
+emotions on Twitter [8,15]. They are composed of characters grouped to resemble emotion faces, such as angry or love. We used a list of positive and negative
+emoticons presented in [1,2] to identify the occurrence of polarity emoticons in
+the document. (d) Emojis: Emojis are similar to emoticons, but instead of
+groups of characters, they are composed by special characters that represent
+draws [5]. We used Emoji Sentiment Ranking [14] for obtaining positive, neutral
+and negative scores for each emoji, and the average of emojis score in the each
+document is used as feature. (e) Sentiment lexicon: We also used the sentiment lexicon Sentilex [18] for identifying sentiment words in the documents. The
+number of positive and negative words in each document is used as a feature.
+(f ) Part-of-speech tag: The tagger from NLPnet [7] was used for extracting
+the PoS tags of the words, and the numbers of verbs, nouns, adjectives and
+adverbs of each document are used as features. They can be useful specially
+for the identiﬁcation of the neutral class, since the number of adjectives may
+indicate polarity documents.
+
+Experiments and Results
+
+For our experiments with CasSUL we used six machine learning classiﬁers Support Vector Machines, Bernoulli Naive Bayes, Logistic Regression, Multilayer Perceptron, Decision Trees and Random Forest. We used scikit-learn, a
+Python machine learning library, for the classiﬁers implementation and for calculating the prediction probabilities (used for ranking the most reliable labels in
+each iteration). Due to space constraints, the results presented in the following
+subsections were summarized, and details of every experiment can be found in
+https://bitbucket.org/HBrum/tweetsentbr/ as well as the framework itself.
+
+Hyperparameter Optimization
+
+We performed a grid-search scheme using diﬀerent hyperparameter for each classiﬁer. The polarity classiﬁcation was evaluated by using a 10% subset of the training corpus (if the test corpus were used for evaluation, the parameters would be
+biased). For every classiﬁer we combined each representation (as shown in Subsect. 3.2) and classiﬁer parameters. We also added a machine learning based
+feature selection using an SVM as presented in [1].
+Every model was trained ﬁve times for each classiﬁer using the training set of
+TTsBR (removing the 10% validation subset). The averages of the results were
+taken in order to rank the executions and get the best sets of representations
+and hyperparameters. The combinations of classiﬁers and hyperparameters are
+listed below.
+
+
+(a) SVM: With c values varying as 0.001, 0.01, 0.1, 1 and 10. The hyperparameters obtained were bag-of-words + emoticons + emojis and feature selection
+using c=1. (b) Naive Bayes: With alpha values varying as 0.1, 0.5 and 1. The
+best results were obtained with bag-of-words + emoticons + emojis + sentiment lexicon + PoS tagging and feature selection using alpha=0.1. (c) Logistic
+Regression: We did not explore any hyperparameters for logistic regression,
+only the representations. The best ﬁt was bag-of-words + emoticons + emojis +
+PoS tagging and feature selection. (d) Multilayer Perceptron: Relu was used
+as activation function in our experiments with MLP. We varied the number of
+layers (1 and 2), the number of neurons with 30, 60, 100 and 200 (using always
+the same number even with two layers), the alpha with 0.001, 0.001 and 0.01
+and the learning rate with 0.001, 0.01 and 0.1. The best representation was bagof-words + negation words + emoticons + emojis + sentiment words + PoS
+taggin and feature selection. The best results were obtained with two layers, 200
+neurons, alpha=0.001 and learning-rate=0.001. (e) Decision Trees: We varied
+the criterium of the tree split using gini and entropy, the maximum depth of the
+tree with 4, 5, 8 and with no limit. The best ﬁt was bag-of-words + negation
+words + emoticons + emojis without feature selection using gini as criterium
+and not establishing a maximum depth. (f ) Random Forest: We varied the
+number of estimators (30, 60, 100 and 200), the criterium (gini or entropy) and
+the maximum depth (4, 5, 8 and without limit). The best results were obtained
+with bag-of-words + negation words + emoticons + emojis and feature selection
+using 200 estimators, entropy as criterium and without maximum depth.
+4.2
+
+TTsBR + CasSUL Extension Using Unlabeled Data
+
+For evaluating CasSUL framework we ran the framework using TTsBR train
+set (12.999 documents) as the manually labeled input and extended it with the
+unlabeled data extracted (117.090) documents. At the end of the last iteration
+the full corpus will contain 130.089 documents, being a combination of the manual labeled data with the unlabeled classiﬁed set. After we obtained the ﬁnal
+corpus, we trained six models (using the six classiﬁers presented before) using
+it and predicted the TTsBR test set labels (2.001 documents), measuring the
+F1-measure of each model and averaged the value.
+We repeated the process using seven thresholds of conﬁdence empirically
+set (40%, 30%, 25%, 20%, 10%, 5% and 1%) and changing the classiﬁer responsible for the classiﬁcation model used by CasSUL. Table 1 presents the results
+obtained for each corpus generated (each cell represents the average F1-Measure
+of each corpus). For example, the ﬁrst line of the Table presents the evaluation
+of a CasSUL extended corpus obtained with SVM classiﬁer ran with each of the
+seven thresholds of conﬁdence.
+The intuition behind the thresholds is that using a lower threshold we ensure
+more iterations and less documents being added to the ﬁnal corpus more slowly.
+Using a higher threshold we add more documents in each iteration (possibly
+adding more noise to the dataset).
+
+Semi-supervised Sentiment Annotation of Large Corpora
+
+391
+
+Table 1. Average F1-measure obtained by each classiﬁer using diﬀerent thresholds in
+three polarity classes on TTsBR.
+Classiﬁer
+
+
+The same process was applied to the original dataset obtaining 61.01 on
+average F1-Measure. The extended corpus obtained the best results using MLP
+classiﬁer. Since we are using a held-out subset, our main goal was to achieve
+values close to the obtained with the original manually annotated corpus.
+One phenomena observed during the experiments was the skewing of the
+majority class in TTsBR (positive). This skewing caused the positive documents
+to be added early and far more than the others. Some of the ﬁnal corpora
+generated had only 7% of the documents labeled as neutral, while 63% were
+labeled positive. In order to reduce this skewing we used under-sampling [12],
+removing documents for the majority class to balance the corpora, and repeated
+the experiments. The results are shown in Table 2.
+Table 2. Average F1-measure obtained by each classiﬁer using diﬀerent thresholds in
+three class sentiment analysis on balanced TTsBR.
+Classiﬁer
+
+40%
+
+30%
+
+25%
+
+20%
+
+10%
+
+5%
+
+1%
+
+Linear SVM
+
+60,57
+
+60,84
+
+60,69
+
+60,81
+
+60,91
+
+59,19
+
+56,60
+
+Naive Bayes
+
+57,16
+
+56,08
+
+55,27
+
+54,36
+
+49,06
+
+46,78
+
+45,01
+
+61,71 61,48 61,55
+
+58,93
+
+53,56
+
+50,30
+
+Logistic regression 61,45
+MLP
+
+62,13 60,64
+
+61,10
+
+61,68 61,60 61,50 61,64
+
+Decision tree
+
+Random forest
+
+Although the results did not improve, the ﬁnal corpora kept the balance.
+Neutral documents rose from 7% to 15% when using under-sampling. All the
+distributions (with and without under-sampling) had positive as majority class
+in the extended corpora. We believe this class may be the easiest to set apart
+from the neutral and negative, achieving the best conﬁdence levels and being
+added more frequently to the corpora.
+
+H. B. Brum and M. G. V. Nunes
+
+Using CasSUL on Fully Labeled Corpora
+
+We also evaluated CasSUL using only manually labeled data. For this experiment we used Buscap´e Corpus, Mercado Livre Corpus and Brazilian Elections (Elections-Dilma and Elections-Serra). For each corpus we used a 10%
+sample of the data observing the labels and the remaining 90% of the documents as unlabeled data. All the experiments on these corpora were performed
+on binary classiﬁcation, since none of them contains neutral documents. We used
+the same hyperparameters as the experiments presented in Subsect. 4.1. The only
+diﬀerence is the absence of a test set for evaluation since in this scenario we had
+the correct labels for the data automatic annotated.
+Our best extended corpora with Buscap´e obtained 84.74% of F1-Measure
+using Logistic Regression with 1% threshold. Without extension we achieved
+87.66% of F1-Measure on the same 10-fold scheme. For Mercado Livre we
+achieved 93.17% of F1-Measure also with Logistic Regression with threshold
+10%, but still under the 94.76% obtained without extension. Using ElectionsDilma corpus we obtained 83.69% with a MLP extended corpus using 1% threshold as the best value. Without the extension the same experiment resulted in
+93.15% F1-Measure. For Elections-Serra we achieved 88.23% with a Random
+Forest extension using 30% threshold, but 93.63% without extension. Both of
+the corpora are unbalanced and we can see how this skewing aﬀects our framework.
+4.4
+
+Comparison Between Our Approach Vs Distant Supervision
+
+Distant Supervision is a popular method for annotating a large scale corpus for
+SA, since it demands almost no human eﬀort and can be scalable for hundreds
+of thousands of documents, even on social networks. Pelesent [5] is a distant
+supervision corpus for Brazilian Portuguese created using emojis and emoticons. It contains 980.067 tweets automatically labeled through this approach.
+We have compared Pelesent with the extended TTsBR generated by CasSUL,
+with 117.090 documents, on the polarity classiﬁcation task.
+Three classiﬁers, Linear SVM, MLP and Logistic Regression, were used for
+training models using Pelesent and TTsBR extended (the corpus obtained with
+MLP using threshold 30%) and the evaluation was carried on cross domain
+corpus (Buscap´e, Mercado Livre and Brazilian Elections). In this scenario we
+did not used the optimized hyperparameters, since it was designed for other
+domain. Instead we used the word embeddings trained in [5] with word2vec,
+600-dimensions/c-bow.
+Since Pelesent is only labeled in two classes, we used only pos/neg TTsBR
+documents, reducing its size to 128.030 documents total. In Table 3 we can see the
+results of general F1-Measure for each class. Although seven times smaller, the
+corpus annotated via CasSUL framework achieved better results than Pelesent
+in almost every experiment.
+
+Semi-supervised Sentiment Annotation of Large Corpora
+
+393
+
+Table 3. Comparison between TTsBR extented using MLP with 30% threshold and
+Pelesent on cross-domain polarity classiﬁcation.
+Evaluation corpus Classifier
+
+Extended TTsBR
+
+Pelesent
+
+F-pos F-neg F-Measure F-pos F-neg F-measure
+Elections-Dilma
+
+Elections-Serra
+
+Mercado livre
+
+Buscap´
+e-1
+
+Buscap´
+e-2
+
+5
+
+Linear SVM
+
+MLP
+
+
+
+Linear SVM
+
+
+Log. Regression 
+
+Discussion and Future Work
+
+In this paper we presented CasSUL, a framework for annotation of sentiment
+corpora using self-training. Using CasSUL, the size of the manually annotated
+corpus TTsBR was extended eight times. The extended TTsBR, when used
+in a polarity classiﬁcation task, achieved similar results when compared to the
+original corpus. This performance has to be conﬁrmed in other NLP tasks, but
+this evidence of preservation of the annotation quality encourages us to create
+more representative annotated corpora, as new annotated examples are added
+to them, with no additional annotation cost. CasSUL was also superior to the
+most popular alternative for automatic labeling a large datasets for SA (Distant
+Supervision), even with a corpus ten times bigger.
+CasSUL is limited by the self-training known weaknesses as error propagation
+and skewed class distributions, but this could be reduced by the use of other
+techniques such as under-sampling or of other semi-supervised alternatives like
+co-training, for example. Despite of the results with annotated corpora had been
+inferior to the ones of non-extended corpora, we believe that the size of the
+datasets may be a key factor on this issue.
+Improvements in CasSUL could include: the addition of a step where manual annotators could revise the machine labels (Active Learning), as successfully
+reported in [6]; more classiﬁers could be added in order to improve even more the
+conﬁdence on the ﬁnal corpus. The use of Deep Learning methods are very recommended since neural architectures have been achieving state-of-the-art values
+regularly and this approach can be easily inputed in CasSUL.

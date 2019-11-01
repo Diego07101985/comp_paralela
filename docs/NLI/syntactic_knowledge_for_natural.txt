@@ -1,0 +1,298 @@
+
+Abstract. Natural Language Inference (NLI) is the task of detecting
+relations such as entailment, contradiction and paraphrase in pairs of
+sentences. With the recent release of the ASSIN corpus, NLI in Portuguese is now getting more attention. However, published results on
+ASSIN have not explored syntactic structure, neither combined word
+embedding metrics with other types of features. In this work, we sought
+to remedy this gap, proposing a new model for NLI that achieves 0.72 F1
+score on ASSIN, setting a new state of the art. Our feature analysis shows
+that word embeddings and syntactic knowledge are both important to
+achieve such results.
+Keywords: Natural Language Inference
+Recognizing Textual Entailment · Feature engineering
+
+1
+
+· Syntax
+
+Introduction
+
+Natural Language Inference (NLI), also known as Recognizing Textual Entailment (RTE), is the NLP task of determining whether a hypothesis H can be
+inferred from a premise P [7] (usually, P and H are sentences). Other semantic
+relations are also possible, such as contradiction [4,13] and paraphrase [10].
+Datasets for NLI on English exist since 2005, with the RTE Challenges [6],
+and later with the SICK [13] and SNLI [4] corpora. For Portuguese, only recently
+the ASSIN [10] corpus was released, containing 10,000 sentence pairs annotated
+for NLI (entailment, paraphrase and neutral) and for semantic similarity [1].
+Still, published results on the ASSIN dataset are worse than a word overlap
+baseline or only slightly better than it [2,3,8,9]. We hypothesize this is because
+these models focused on lexical overlap and similarity, without any attention to
+syntactic structure. On top of that, lexical similarity methods could be improved
+with the use of word embeddings, which have already been shown to be very
+eﬀective in the semantic similarity task [11].
+In this work, we sought to remedy this limitation by exploring richer representations for the input pairs. We extracted features including syntactic knowledge and embedding-based similarity, besides well established ones dealing with
+word alignments. Our model, named Infernal (INFERence in NAural Language),
+
+Syntactic Knowledge for Natural Language Inference in Portuguese
+
+achieved new state-of-the-art results, with 0.72 macro F1 score on the complete
+ASSIN dataset (i.e., both Brazilian and European variants).
+Moreover, we analyzed a sample of misclassiﬁed pairs in order to understand
+the diﬃculties of the task. We found that most of them pose signiﬁcant diﬃculties, and that richer NLP resources (such as repositories of equivalent phrases)
+are necessary to improve performance on NLI and related tasks.
+This paper is organized as follows. We ﬁrst summarize the ASSIN dataset
+in Sect. 2, and brieﬂy discuss previous related work on it in Sect. 3. We present
+our model in Sect. 4, and our experiments and ﬁndings in Sect. 5. We bring our
+conclusions in Sect. 6.
+
+ASSIN Dataset
+
+ASSIN [10] has 10,000 sentence pairs annotated for NLI (with entailment, paraphrase and neutral labels), half in Brazilian Portuguese (PT-BR) and half in
+European Portuguese (PT-PT)1 . It is an unbalanced dataset: the neutral relation has 7,316 pairs, entailment has 2,080 while the paraphrases are a small
+portion of the set (604 pairs). Either language variant has 2,500 pairs for training, 500 for validation and 2,000 for testing, the three of them with the same
+proportions among classes.
+Its sentences come from news articles, making the corpus more complex and
+with more varied topics than SNLI or SICK, which were produced from image
+captions. Thus, ASSIN presents challenges such as world knowledge, idiomatic
+expressions and named entities. Its diﬃculty is reﬂected in the fact that three
+out of four participants in the ASSIN shared task had performance below a word
+overlap baseline (a logistic regression classiﬁer trained with the ratio of words in
+P that appear in H and the ration of words in H that appear in P ).
+Related Work
+
+While works for NLI in English currently take advantage of large scale datasets
+to train deep neural networks [5,18], the lack of such a corpus for Portuguese
+has limited NLI strategies to shallow models dependent on feature engineering.
+Thus, we restrict our revision to published work with the ASSIN dataset.
+The current state-of-the-art in ASSIN for PT-BR was achieved by Fialho
+et al. [9]. They consider diﬀerent views of the input sentences: the original words,
+a lowercase version, stemmed words, among others. From each view, they extract
+metrics like string edit distance, word overlap, BLEU, ROUGE, and others. In
+total, 96 features are fed to an SVM, achieving 0.71 F1 for PT-BR and 0.66 for
+PT-PT. Feitosa and Pinheiro [8] tried to improve on these results, adding eight
+new wordnet-based features to capture lexical similarity. However, they did not
+gain any signiﬁcant improvement.
+
+E. Fonseca and S. M. Alu´ısio
+
+Rocha and Cardoso [17] reached the state of the art for PT-PT. They used a
+relatively small set of features, including counts of overlapping or semantically
+related tokens (such as synonyms and meronyms), named entities, word embedding similarity and whether both sentences have the same verb tense and voice.
+While the last one employs some syntactic knowledge, it is rather limited, and
+it is not clear how they deal with sentences with more than one verb, which
+are common in ASSIN. They only present results for PT-PT, with their best
+setup having 0.73 F1 . Curiously, while Fialho et al. [9] reports better results
+when combining PT-BR and PT-PT training data, Rocha and Cardoso [17] had
+a slight performance decrease when they did the same.
+Reciclagem [2] did not use any machine learning technique; instead, it relied
+solely on lexical similarity metrics extracted from various resources. ASAPP,
+from the same authors, improved on this base by using an automatic classiﬁer
+and included features such as counts of tokens, nominal clauses and named
+entities.
+The Blue Man Group [3] extracted many word embedding-based similarity
+features from the pairs. They compare words of one sentence with the other,
+grouping similarity values in histograms, which are then fed to an SVM classiﬁer.
+They also report negative results with deep neural networks, although they do
+not mention any performance value.
+Data Modeling
+Pre-processing
+
+We perform some steps in an NLP pipeline in order to extract features. We run
+a syntactic parser, a named entity detector (NER), lemmatize words and ﬁnd
+lexical alignments.
+We used the Stanford CoreNLP dependency parser [12] trained on the Brazilian Portuguese corpus of the Universal Dependencies (UD) project2 , version 1.3.
+We used the spaCy pre-trained NER model for Portuguese3 , version 2.0. SpaCy
+also has a pre-trained syntactic parser for Portuguese, but we found that its
+performance is worse than the CoreNLP model.
+For lemmatization, we checked the Unitex DELAF-PB dictionary4 with POS
+tags produced by CoreNLP. The DELAF-PB is a Brazilian Portuguese resource;
+however, word forms in European Portuguese orthography can easily be checked
+against it after replacing some characters. If a word is not found in the dictionary,
+it is searched again after replacing some consonant clusters (ct and pt for t, c¸c
+and p¸c for c¸, and mn for n).
+Once we have word lemmas, we align words in the two sentences if they have
+the same lemma or share a synset in OpenWordNet-PT [14]. Using the same
+
+The DELAF-PB dictionary maps inflected word forms to lemmas, according to their
+part-of-speech tag. 
+
+Syntactic Knowledge for Natural Language Inference in Portuguese
+resource, we also align verbs with nominalizations (such as correr and corrida).
+Named entities are aligned if they are exactly the same or if one is an acronym
+composed of the initial letters of the words of the other one.
+4.2
+
+Once we have preprocessed sentence pairs, we can extract features from them. We
+also depended on two other resources to compute features: a stopword list and
+a word embedding model. The former is the one available in NLTK5 , expanded
+with the punctuation signs and the words ´e, ser and estar, which were lacking
+from it. The embedding model was trained with Glove [16] over a collection of
+news texts, literary books and Wikipedia, with over 500 million tokens.
+We also used the concept of Tree Edit Distance (TED) in some features,
+which measures how diﬀerent two trees are from each other and has already
+been successfully used for NLI [19]. The idea of TED is to apply a sequence
+of edit operations to a tree that transforms it into another one. The possible
+operations are the insertion of a node, removal of a node, or replacement of a
+node for another. The cost for each operation must be deﬁned individually a
+priori (possibly, costs may depend on the involved words or dependency labels).
+Given two trees and the cost of each possible operation, the minimal TED can
+be computed in polynomial time. We used the Zhang-Shasha algorithm [20] in
+our implementation.
+The complete list of features is described as follows. Note that, while we
+list 14 features, some of them can be computed when aligning P to H or viceversa, and others can be normalized by the length of either sentence. In total,
+we extract 28 feature values.
+1. BLEU. (BiLingual Evaluation Understudy) is a common metric in Machine
+Translation. It computes how many n-grams with 1 ≤ n ≤ 4 from one sentence
+appears in the other. It has two values: using P as reference (denoted here as
+P → H) and using H (H → P ).
+2. Dependency overlap. The proportion of overlapping dependency tuples.
+A dependency tuple is composed by the dependency label, parent node and
+child node; two tuples are considered as overlapping when they have the same
+label and aligned parent and child nodes. Additionally, the passive subject
+label (nsubjpass) is considered equivalent to the direct object label (dobj ).
+This feature has two values: the ratio of overlapping tuples with respect to
+the length of P and to the length of H.
+3. Nominalization. This feature checks whether one sentence has a verb aligned
+with a nominalized form used as direct object. It has two values, depending
+on which sentence has the verb and which has the nominalization.
+4. Length ratio. Length ratio between the number of tokens in P and H,
+excluding stopwords.
+E. Fonseca and S. M. Alu´ısio
+5. Verb arguments. This feature has two values that check whether verbs
+in the two sentences also have the aligned subject and direct object. If the
+objects diﬀer, it has value (0, 0); if they are aligned, it is (1, 1). If only H
+has an object, it has value (0, 1), if only in P , (1, 0). The values are denoted,
+respectively, by verb arguments P → H and verb arguments H → P .
+6. Negation. This feature checks if an aligned verb is negated in one of the
+sentences. This happens when the verb has a modiﬁer with the label neg.
+7. Quantities. This feature has two values that check for quantities describing
+aligned words (indicated by the dependency label num). The value of the
+modiﬁer is computed both for digits and fully written forms. The ﬁrst feature
+value is 1 if any two words have the same quantity, 0 otherwise; the second
+one is 1 if there is a quantity mismatch. In case of no aligned words with
+quantity modiﬁer, it is (0, 0).
+8. Sentence cosine. The cosine similarity between the two sentence vectors.
+Vectors are obtained as the elementwise average of all token vectors.
+9. Simple TED. The TED between the two sentences, considering insert,
+removal and update costs as 1. Two nodes are matched when they have the
+same lemma and dependency label. This feature has three values: the TED
+value itself, TED divided by the length of P and by the length of H.
+10. TED with cosine distance. The TED like the one above, except that
+update costs are equal to the cosine distance between embeddings.
+11. Word overlap. The ratio of words in each sentence for which there is
+another word with the same lemma in the other sentence, excluding stopwords. The ratio to the length of P is denoted overlap P, while the ratio to
+H is overlap H.
+12. Synonym overlap. Like the one above, but considering any aligned word,
+not only with the same lemma.
+13. Soft overlap. This feature measures word embedding similarity instead of
+a binary match. For each word in a sentence, except stopwords, we take its
+highest cosine similarity with words from the other sentence, then we average
+all similarities. It has one value for each sentence.
+14. Named entities. This feature checks for the presence of named entities,
+and has three binary values. The ﬁrst indicates whether there is named entity
+in P without an equivalent in H; the second one indicates the opposite; and
+the third one indicates the presence of an aligned pair. All combinations of
+values are possible, depending on the number of named entities in the pair.
+Our features contemplate diﬀerent levels of knowledge: simple count statistics
+(1, 4, 11), resource-based lexical semantics (3, 12, 14), syntax (2, 3, 5, 6, 7, 9,
+10) and embedding-based semantics (8, 10, 13). To the best of our knowledge,
+features 9, 10 and 13 have not been used before for NLI. Our implementation is
+available at https://github.com/erickrf/infernal.
+
+Syntactic Knowledge for Natural Language Inference in Portuguese
+
+We trained diﬀerent classiﬁers in our experiments, using the scikit-learn library
+[15]: Logistic Regression (LR), Support Vector Machines (SVM), Random Forest
+(RF) and Gradient Boosting (GB).
+We combined PT-BR and PT-PT training data, like in the best results
+reported by [9]. Before training classiﬁers, we normalize feature values: given
+a training data matrix X ∈ Rn×d , with n training examples and d features (28
+with our full set), we normalize each column to have mean 0 and variance 1.
+We did a 10-fold cross-validation in the training set in order to select the most
+relevant hyperparameters for some algorithms. For SVM, we used a penalty c of
+value 10, and an RBF kernel with γ coeﬃcient 0.01. For RF, we used 500 trees
+which could use up to 6 features each, and expandable to the maximum. For
+GB, we used 500 trees with a maximum depth of 3 and learning rate η of 0.01.
+All other hyperparameters had default values of scikit-learn version 0.18.
+Additionally, for LR and SVM, it is also possible to weight training examples
+to the inverse proportion of their class (in order to give more importance to
+paraphrase and entailment examples), and we also experimented that. Table 1
+shows the results of our classiﬁers, as well as the previous state-of-the-art and
+the word overlap baseline.
+Table 1. Infernal performance on ASSIN. The F1 values are the macro F1 (mean for
+all classes). The bottom part of the table shows previous state-of-the-art results and
+the word overlap baseline. RC refers to Rocha and Cardoso [17]
+Model
+
+Almost our models achieved higher accuracy and F1 than the previous state
+of the art, showing that our features provide a good representation of the data
+for this problem. This is more evident when we consider that we used 28 features,
+while [9] used 96. No single algorithm stood out as best, but Logistic Regression
+seems interesting for coupling good performance with low computational cost
+and low sensibility to hyperparameters.
+
+Feature Analysis
+
+We also analyzed the relative importance of our features. Determining the exact
+importance of each one in a multidimensional setting where there may be some
+interdependence is impossible, but we can get reasonable estimates from methods
+like Random Forest and Gradient Boosting. These methods, which are ensembles
+of decision trees, can score feature importance based on how well they split the
+data in diﬀerent classes.
+Thus, we trained 10 instances of RF and GB, varying the random seed, and
+averaged the relative importance of each one, in order to get a more stable estimate. The importance of the features can be seen in Table 2, ordered according
+to the average importance for the two algorithms.
+As expected, features related to word overlap have bigger weight, evidenced
+by the good performance of the word overlap baseline. Among them, our newly
+Table 2. Features importance. The first and fifth column show the relative ordering
+of each feature; %GB and %RF indicate the percentual importance of each feature
+for each algorithm.
+3 Synonym
+
+proposed soft overlap is one of the most important ones as well as the sentence
+cosine, showing that the ﬂexible nature of word embeddings can be very useful
+for NLI.
+In the middle positions, we see features related to syntactic structure: dependency overlap, matching quantities and TED. While less informative than lexical overlap, they still bring substantial information, which suggests they were
+responsible for the good performance of our models beyond lexical similarity.
+As the least useful features, we have nominalizations, named entities, negation and verb structure features. While somewhat informative, we found that
+negated verbs and nominalizations are relatively rare in ASSIN, limiting their
+impact. The verb structure feature is too speciﬁc to be discriminative as well.
+We conjecture that named entity features had lower usefulness because the same
+entity may often be described in diﬀerent ways—such as an omitted ﬁrst or last
+name. Retraining our models without the least informative features resulted in
+a slight performance drop, indicating that they are still good to have.
+
+Contextual synonyms are words which have the same meaning only in very
+speciﬁc contexts, and thus not expected to be found in wordnets. Example:
+
+Quantity specifiers are expressions that specify that two quantities may diﬀer
+and still keep an entailment relation, such as at least, approximately, etc.
+Example: De acordo com a pol´ıcia, 56 agentes e 12 manifestantes ﬁcaram
+feridos/Pelo menos 46 policiais e sete manifestantes ﬁcaram feridos.
+Qualified named entity are named entities appearing in one sentence with
+a more detailed description, such as a title or profession (actor, president,
+etc.). Since this description is subsumed by the entity itself, it should not
+aﬀect an entailment decision. Example: Tite, no segundo tempo, trocou Ralf
+por Mendoza/O atacante Mendoza entrou no lugar do volante Ralf.
+These issues are hard to solve. For quantiﬁcation, a list of expressions indicating approximate quantities can solve some cases. Concerning rewritten passages,
+resources containing equivalent expressions and phrases are also useful, although
+limited in the generalization capacity.
+At any rate, a larger NLI corpus would be useful, allowing models to learn
+more subtleties from language and depend less on word overlap. Also, more data
+would make more feasible the eﬃcient training of neural models, which have
+been successful in larger English corpora.
+Conclusion
+
+We have presented a new feature set for the NLI task on the ASSIN corpus,
+shown that it sets a new state-of-the-art with diﬀerent classiﬁers, and performed
+a careful analysis of feature importance and sources of error.
+The features we proposed encode syntactic knowledge about the pairs, something that, to the best of our knowledge, was missing in all published results on
+ASSIN to date. Also, we proposed a more ﬂexible lexical similarity measure, the
+soft overlap, which is a strong indicator for NLI. Our feature set has been shown
+to be very useful for this task, and might be useful as well for other related tasks
+involving the semantics of two sentences.
+Moreover, we pointed out the current challenges that ASSIN poses to NLI
+systems. Once we have eﬃcient means to overcome them, even better performances can be expected.
+Acknowledgments. This work was supported by FAPESP grant 2013/22973-0.
+
+Syntactic Knowledge for Natural Language Inference in Portuguese

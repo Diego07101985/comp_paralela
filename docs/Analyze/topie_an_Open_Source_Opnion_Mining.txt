@@ -1,0 +1,308 @@
+
+Abstract. The growth of social media and user-generated content (UGC) on the
+Internet provides a huge quantity of information that allows discovering the
+experiences, opinions, and feelings of users or customers. These electronic Word
+of Mouth statements expressed on the web are prevalent in business and service
+industry to enable a customer to share his/her point of view. However, it is
+impossible for humans to fully understand it in a reasonable amount of time.
+Opinion mining (also known as Sentiment Analysis) is a sub-ﬁeld of text mining
+in which the main task is to extract opinions from UGC. Thus, this work presents
+an open source pipeline to analyze the costumer’s opinion or sentiment in Twitter
+about products and services oﬀered by Brazilian companies. The pipeline is based
+on General Architecture for Text Engineering (GATE) framework and the
+proposed hybrid method combines lexicon-based, supervised learning, and rulebased approaches. Case studies performed on Twitter real data achieved precision
+of almost 70 %.
+Keywords: Text mining · Text classiﬁcation · Opinion mining · Sentiment
+analysis · Portuguese language · GATE
+
+1
+
+Introduction
+
+The growth of social media and user-generated content (UGC) on the Internet provides
+a huge quantity of information that allows discovering the experiences, opinions, and
+feelings of users or customers. The volume of data generated in social media has grown
+from terabytes to petabytes [1].
+These electronic Word of Mouth statements expressed on the web are much prevalent
+in business and service industry to enable customer to share his/her point of view [2].
+Companies, on the other hand, have used this information to improve the quality of its
+
+© Springer International Publishing Switzerland 2016
+J. Silva et al. (Eds.): PROPOR 2016, LNAI 9727, pp. 95–105, 2016.
+DOI: 10.1007/978-3-319-41552-9_9
+
+96
+
+E. Souza et al.
+
+products and services. Studies informed that 88 % of Brazilian companies use at least
+one social network [3].
+Twitter has 320 million1 monthly active users and it oversees 1 billion ‘tweets’ every
+day. Since it is a rich source of real-time information, many entities (companies, poli‐
+ticians, government, etc.) have demonstrated interest in knowing the opinions of people
+about services and products.
+However, it is not possible for humans to fully understand UGC in a reasonable
+amount of time, which explains the growing interest by the scientiﬁc community to
+create systems capable of extracting information from it [4]. Speciﬁc processing
+methods, techniques and algorithms are required in order to extract knowledge from
+unstructured texts [5].
+According to Liu [6], sentiment analysis, also known in the literature as opinion
+mining, is the ﬁeld of study that analyzes people’s sentiments, evaluations, attitudes,
+and emotions about entities such as products, services, organizations, individuals, issues,
+events, topics, and their attributes expressed in textual input. This is accomplished
+through the opinion classiﬁcation of a document, sentence or feature into categories:
+‘positive’, ‘negative’, and ‘neutral’. This kind of classiﬁcation is referred to in the liter‐
+ature as sentiment polarity or polarity classiﬁcation.
+Given that the Portuguese language is one of the most common spoken languages
+in the world - with almost 270 million people2 speaking some variant of the language,
+and it is also the second most frequent language on Twitter [7], the goal of this work is
+to provide an open-source opinion mining pipeline for ‘tweets’ written in Brazilian
+Portuguese. The pipeline is based on the GATE [8] framework and the proposed hybrid
+method combines lexicon-based, supervised learning, and rule-based approaches in
+order to achieve better results and reduce context dependence [9].
+The contributions of our paper are as follows:
+1. An open-source application (see Footnote 3) to evaluate the customers’ opinion
+about products and services oﬀered from Brazilian companies;
+2. Experimental execution on a set of real micro-blogging posts to evaluate the
+proposed pipeline;
+3. A dataset3 containing 33306 tweets of the most complaints companies according to
+Consumer Protection and Defense Program agency (PROCON);
+4. Finally, we include a gold standard (See footnote 3) containing 543 tweets manually
+labeled into three classes (polarity): positive, negative and neutral;
+The remainder of this paper is structured as follows: Sect. 2 provides the related
+work. Section 3 presents the opinion mining process. Section 4 details the pipeline,
+called TOPIE. Section 5 presents an experimental evaluation with a real case study.
+Finally, Sect. 6 contains the conclusions and directions for future work.
+
+Related Work
+
+Works dealing with Portuguese language are scarce, and most eﬀorts are directed
+towards the English language [2, 6, 10]. After performing a systematic mapping review
+on several scientiﬁc databases up to the year 2014, twenty-ﬁve papers relating the appli‐
+cation of opinion mining for Portuguese (Brazilian and European variants) were iden‐
+tiﬁed, from which eight papers [3, 11–18] have analyzed the consumers’ sentiment like
+the study proposed in this paper.
+The work of Nascimento et al. [11], and Santos and Ladeira [17] make use exclu‐
+sively of machine learning as opinion mining approaches. On the other hand, Avanço
+and Nunes [12], Freitas and Vieira [13], Santos et al. [18], and Chaves et al. [14] built
+their sentiment analysis using lexicon-based approaches. The works of [3, 15, 16] are
+more similar to our proposal as they adopted hybrid approaches, that is lexicon-based,
+supervised learning, and rule-based approaches.
+The work of Evangelista and Padilha [3] propose a tool to classify web publications
+made on social networks such as Facebook and Twitter as positive, negative and neutral.
+For the classiﬁcation task, this tool uses SentiWordNet lexical resource and the Naive
+Bayes algorithm. In the realized experiments, the collected publications to classiﬁcation
+are from three Brazilian e-commerce companies. The results were very relevant for
+publications from Twitter using Naive Bayes algorithm for the e-commerce domain,
+with a correct classiﬁcation rate of between 71 % and 95 %.
+The works of Rosa et al. [15, 16] analyzes Brazilian Consumers’ Sentiments on
+Twitter for the hair cosmetics domain using SentiMeter-Br. For the Portuguese
+dictionary performance validation, the results were compared with the SentiStrength
+algorithm and evaluated by three Specialists in the ﬁeld of study. The polarity of the
+short texts was also tested through machine learning, with correctly classiﬁed instances
+of 71.79 % by Sequential Minimal Optimization (SMO) algorithm.
+Related papers presented in the last two paragraphs diﬀer from our proposal in some
+aspects: (1) our opinion mining system was evaluated for multiple domains, such as
+telecommunication, telephony, and banking; (2) the sentiment analysis of our approach
+is executed in feature level through entities recognition; (3) the open-source pipeline as
+well as the dataset used to build and evaluate the opinion mining system are available
+for the use of other researchers; and (4) we have used only one tool (GATE) [8] to
+perform all the opinion mining steps.
+
+3
+
+Opinion Mining Steps
+
+Figure 1 presents the process used to build the proposed opinion mining application. It
+is based on the work of Aranha and Passos [19] and divided into four steps which are
+detailed in the following subsections. Resources and dataset are publicly available (See
+footnote 3).
+
+98
+
+E. Souza et al.
+
+Fig. 1. Opinion mining steps based on [19]
+
+3.1 Data Acquisition
+This step included the dataset collection and gold collection construction. We built a
+web crawler to collect data from Topsy4 database. The crawler received as input the
+companies’ identiﬁcation on Twitter and returned a list of tweets in JSON ﬁle. We have
+collected more than 30000 tweets of companies that received the most complaints in
+2013 according to PROCON (Table 1). The reason why those companies were selected
+was that we would like to compare results from Twitter and PROCON.
+Table 1. List of companies that received the most complaints in 2013 (PROCON)
+
+For the gold collection, a total of 543 ‘tweets’ were manually labeled between three
+classes: ‘positive’, ‘negative’, or ‘neutral’ by at least two researchers.
+3.2 Pre-processing
+We performed the following pre-processing techniques on input data: tokenization,
+sentence split, part-of-speech (POS) and named entity recognition (NER). They are
+detailed in Sect. 4.
+
+TOPIE: An Open-Source Opinion Mining Pipeline
+
+99
+
+3.3 Processing
+The opinion mining pipeline was built on the top of GATE [8] and it is based on [20],
+as detailed in Sect. 4. Our classiﬁcation system performs the sentiment analysis at the
+feature level of granularity. The polarity is determined using a hybrid approach that
+combines machine learning as well as lexicon and rule-based.
+A lexicon dictionary (Gazetteers) with more than 10000 words was built manually
+from the analysis of 2000 tweets extracted from Corpora. The words are distributed in
+several categories as shown on the left side in Fig. 2. The conditional balloon brings
+together all terms used to describe a condition, for example, ‘if’ and ‘case’. Organization
+lists the names of companies and some variations since it is common to ﬁnd the use of
+informal language in social networks. Feeling contains terms related to an aﬃrmation
+or denial, for example: ‘for sure’. Relationship has words focused on descriptions of
+some relationships between the company and the person who made the post. An example
+might be words like ‘bought’ and ‘waiting’. Emotion lists words that are related to the
+emotional state of the user, such as ‘fear’, ‘sadness’ and ‘anger’. The Emoticon balloon
+contains the emotions icons used to describe a feeling.
+
+Fig. 2. Dictionary categories and grammatical rules
+
+The balloons on the right side in Fig. 2 contains the built grammar rules to extract
+conditional, tweet general information, date, URL, address, and relationship data. The
+grammar rules were developed using JAPE, which is an annotation patterns engine based
+on regular expression [8]. Figure 3 shows an example of a rule in Jape. Supposing that
+the token ‘Smile’ is found in an opinion, the rule from Fig. 3 will annotate ‘aﬀect’ to
+the category attribute and ‘joy’ to the kind attribute. Figure 4 shows the annotation result
+for the token “ruim” (bad), which was classiﬁed as a negative feeling (sadness) and was
+catch by the “ruleNegationOption” rule.
+The Support Vector Machine (SVM) was selected as it is among the most frequently
+used classiﬁers and has presented good overall result for the opinion mining tasks [2, 10].
+
+
+
+3.4 Evaluation
+We performed three experiments with diﬀerent sizes and classes balanced and selected
+the precision, recall, and f-measure to evaluate the results as they very frequent opinion
+mining measures [10].
+
+4
+
+TOPIE: Twitter Opinion Mining Information Extraction
+
+Figure 5 presents the application architecture built in this study based on the work of
+Bontcheva et al. [20]. The authors proposed the TwitIE pipeline, which is a modiﬁcation
+of the GATE ANNIE [8] open-source pipeline for news text. The TwitIE pipeline was
+customized to micro-blog texts for ﬁve languages (English, Dutch, German, French and
+Spanish) at every stage and includes Twitter-speciﬁc data import and metadata handling.
+The pipeline main components are represented in seven boxes and are detailed below.
+Tweets are read in JSON format and converted into GATE document content. The pipe‐
+line output is a XML annotated ﬁle, which can be used outside GATE.
+
+TOPIE: An Open-Source Opinion Mining Pipeline
+
+101
+
+Fig. 5. TOPIE pipeline based on [20]
+
+The gray boxes (Language Identiﬁcation and Normalizer) are the ones that we did
+not use in our pipeline. The boxes with dashed border (Sentence Splitter and POS) were
+replaced by OpenNLP resources already available for the Portuguese language. The
+boxes with double border (Gazetteer and NER) were developed for this study. The box
+with simple border (Tokenizer) was reused without modiﬁcation.
+4.1 Language Identiﬁcation
+The TwitIE system uses a TextCat algorithm adaptation to Twitter. The TextCat original
+implementation recognizes more than sixty languages, including Portuguese. As our
+pipeline was built and evaluated only for a single language (Brazilian Portuguese), we
+did not make use of this component.
+4.2 TwitIE Tokenizer
+The TwitIE tokenizer is an adaptation of ANNIE’s English tokenizer [8]. This compo‐
+nent was used in our pipeline without modiﬁcation. We have tried the Portuguese
+OpenNLP Tokenizer, but it performed worse and the reason was that it was not adapted
+for micro-blog texts, such as ‘tweets’. Such general purpose tokenizers need to be
+adapted to work correctly on social media, in order to handle speciﬁc tokens like URLs,
+hashtags, user mentions, special abbreviations, and emoticons [20]. Figure 6 shows the
+component results for the token ‘bradesco’.
+
+102
+
+E. Souza et al.
+
+Fig. 6. The tokenizer results on GATE annotation set view
+
+4.3 Gazetteer Lookup
+The gazetteer consists of lists such as cities, organizations, days of the week, etc. It also
+contains the names of useful indicators, such as typical company designators (e.g.
+‘Ltd.’), titles, etc. The gazetteer lists are compiled into ﬁnite state machines, which can
+match text tokens. As shown in Fig. 2 we constructed a list with more than 10000 words
+extracted from the built corpora. Those lists are publicly available (See footnote 3) and
+can be reused in other opinion mining systems for Portuguese.
+4.4 OpenNLP Sentence PT
+The sentence splitter is required for the POS tagger component. The OpenNLP
+Sentence5 - developed speciﬁcally to split sentences written in Portuguese, was reused
+without modiﬁcation.
+4.5 OpenNLP POS Tagger PT
+POS Tagging is used to detect subjective messages by identifying the grammatical classes
+of the words used in the text [21]. Usually adjectives, adverbs and some substantives and
+verbs have polarity values [12]. The OpenNLP POS tagger PT (See footnote 5) developed
+specifically to Portuguese was reused in our pipeline without modification.
+
+
+4.6 Normalizer
+This component performs the NLP normalization task, as a solution for overcoming or
+reducing linguistic noise, very common in micro-blog texts. As this component is
+language-dependent and it does not give support to Portuguese, it was removed from
+our pipeline. However, we consider as future work, to implement a normalizer compo‐
+nent speciﬁcally to micro-blogs texts written in Brazilian Portuguese.
+4.7 Named Entity Recognizer
+This component was developed speciﬁcally for this study. Grammar rules were built
+using JAPE [7] to extract information about entities and features as shown in Fig. 2 (right
+side). Entities such as products, services, organizations, individuals, issues, and their
+attributes expressed in textual input are mapped in this step Fig. 7 presents the overall
+results after the pipeline execution on GATE annotation set view.
+
+Fig. 7. An example of the pipeline results on GATE annotation set view
+
+5
+
+Case Study
+
+In order to evaluate the proposed pipeline, using the GATE plug-in Learning, three
+experiments were performed using diﬀerent conﬁgurations. Table 2 reports the classi‐
+ﬁcation results in precision, recall, and the f-measure on all datasets for the multiple
+kernel-based SVM classiﬁer according to gold collection described in Sect. 3. The data‐
+sets were built randomly and classes are unbalanced.
+The dataset 3 from experiment 1 reaches the best precision (66,5 %) which has little
+signiﬁcance when compared with the work of Bontcheva et al. [20] that reaches preci‐
+sion of 77 %. The main reason is that we did not use speciﬁc components to handle short
+texts from micro-blogs, such as POS tagging which plays an important role identifying
+word classes that suggest sentiment polarity.
+We observed that the used Tokenizer treats hashtags and user mentions as two tokens
+with a separate annotation HashTag covering both which interferes in ﬁnal results.
+
+104
+
+
+
+Also, some characters that compose the date and time ﬁelds were identiﬁed as emotion
+icons. However, our result is signiﬁcant when comparing to the ones presented for the
+Portuguese language presented in Sect. 2, which reaches precision of 71.79 % by
+Sequential Minimal Optimization algorithm and correct classiﬁcation rate between 71 %
+and 95 % using Naive Bayes algorithm for a particular domain.
+
+6
+
+Conclusion
+
+This paper presented TOPIE, a Twitter opinion mining information extraction pipeline
+developed to handle ‘tweets’ written in Brazilian Portuguese. The pipeline was built on
+the top of the GATE framework [8] and it is based on the work of Bontcheva et al. [20].
+The polarity is determined using a hybrid approach that combines machine learning as
+well as lexicon and rule-based. The sentiment analysis is executed in the level of feature
+or aspect through entities recognition. Case studies performed on real data from Twitter
+achieved precision of almost 70 % using SVM classiﬁer for the telecommunication,
+telephony, and banking domains. Issues related to micro-blog were discussed, and the
+requirement for domain adaptation demonstrated. There is still a signiﬁcant gap due to
+insuﬃcient linguistic context and the noisiness of ‘tweets’.
+By releasing TOPIE as open-source, and making dataset and gold collection publicly
+available, we hope to give researchers an easily repeatable, baseline system against
+which they can compare new algorithms. As future work, we plan to evaluate data using
+diﬀerent classiﬁers such as Naïve Bayes and Decision Tree, and compare our corpusbased lexicon to already available lexicon resources for the Portuguese Language, such
+as SentiLex-PT and OpLexicon. We plan also to adapt a Portuguese POS tagger and
+implement the normalization task as texts from micro-blog are written in an informal
+way, with grammatical errors, spelling mistakes, as well as ambiguous and ironic.

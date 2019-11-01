@@ -1,4 +1,4 @@
-# Tarefa para o dia 11
+# Mineração Textos
 
 
 ##  Importante
@@ -18,3 +18,18 @@ No / do diretorio mestrado_cefet  execute os comandos:
 ```make install```  
 
 ```make run```  
+
+## Trabalho3 
+
+Neste trabalho executamos duas tarefas
+
+- Tópico 1 - Matriz TF * IDF (Base curto)
+   -  Matriz TF (formula em log)
+   -  Matriz IDF
+   -  Matriz TF * IDF 
+   -  Criar PDF(Resultados não cabem em um pdf, por isso o csv)
+   -  Criar CSV 
+- Tópico 2 - Busca dos 10 documentos mais relevantes com relação à query (base longo)
+   -  Cáculo da similaridade dos cossenos
+   -  Criar PDF
+
