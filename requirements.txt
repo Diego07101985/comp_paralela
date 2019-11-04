@@ -8,3 +8,6 @@ sklearn
 matplotlib
 pandas
 toolz
+pyspark
+psutil
+mpi4py

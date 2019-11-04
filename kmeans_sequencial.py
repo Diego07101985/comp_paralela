@@ -47,7 +47,6 @@ class K_Means:
 
     # Retona o index documento com o valor mas proximo do centroid
     def closest_document(self, documents, centroids):
-
         metric = Metrics()
         list_centroid = []
         list_closest = []

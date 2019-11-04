@@ -9,5 +9,5 @@ install:
 run:
 	- ( \
        . bin/activate; \
-      python3 main.py \
+    mpirun --hostfile hostfile -n 4 python main.py \
     )
