@@ -7,19 +7,19 @@ from scipy import spatial
 from scipy.spatial import distance
 from metrics import Metrics
 from pyspark.sql import SparkSession
+from pyspark import SparkContext
 from scipy.sparse import csc_matrix, SparseEfficiencyWarning
+import time
 
 
 style.use('ggplot')
 
 
-class K_Means:
+class K_MeansSpark:
     def __init__(self, k):
         self.k_clusters = k
 
     # Calcule os centróides para os clusters, calculando a média de todos os pontos de dados que pertencem a cada cluster.
-
-    # Returns the sum and the count of all the documents in each cluster
     def get_cluster_stats(self, document_1_tuple, document_2_tuple):
         document_1 = document_1_tuple[0]
         document_2 = document_2_tuple[0]
@@ -57,8 +57,6 @@ class K_Means:
 
         return best
 
-    # # Returns the centroid cluster from the sum and count of documents in the cluster
-
     def get_new_clusters(self, cluster_stat):
         cluster_idx = cluster_stat[0]
         cluster_sum = cluster_stat[1][0][1]
@@ -70,11 +68,13 @@ class K_Means:
     def execute(self, matriz_t_idf):
 
         metrics = Metrics()
-
         document_vectors_list = []
 
+        SparkContext.setSystemProperty('spark.executor.memory', '8g')
         spark = SparkSession.builder.appName("PythonKMeans").getOrCreate()
+
         sc = spark.sparkContext
+
         document_id = 0
         cluster_stats = []
 
@@ -86,52 +86,46 @@ class K_Means:
             document_vectors_list.append((document_id, document_vector))
             document_id += 1
 
-        document_vectors_rdd = sc.parallelize(document_vectors_list).cache()
+        # para o uso com o dataset 20_newsgroups
+        document_vectors_rdd = sc.parallelize(
+            document_vectors_list, 200).cache()
+
+        # para o uso do  dataset longo
+        # document_vectors_rdd = sc.parallelize(
+        # document_vectors_list, 5).cache()
+
         document_vectors_rdd.sortByKey()
         initial_centroids = document_vectors_rdd.repartition(
-            1).takeSample(False, 3)
-
-        # print("Centroid {0}".format(initial_centroids))
-
-        for centroids in initial_centroids:
-            print("Centroids {0}".format(centroids))
-        print(initial_centroids)
+            3).takeSample(False, 3)
         temp_dist = 1.0
 
-        # print("Collect {0}".format(document_vectors_rdd.collect()))
+        start = time.time()
+
         while temp_dist > 0.2:
 
             closest = document_vectors_rdd.map(lambda d: (
                 self.closest_centroid(d, initial_centroids), (d, 1)))
 
-            # print("Closest {0}".format(closest.collect()))
-
             closest = closest.filter(lambda d: d[0] != 'erro')
 
-            # print("Closest {0}".format(closest.collect()))
             cluster_stats = closest.reduceByKey(
                 self.get_cluster_stats)
-
-            print("Closest Stats {0}".format(closest.collect()))
 
             new_clusters = cluster_stats.map(self.get_new_clusters).collect()
 
             results = []
             for index_cluster in range(len(new_clusters)):
-                print(initial_centroids[index_cluster][1])
-                print(new_clusters[index_cluster][1])
                 results.append(metrics.get_eculedian_distance_2(
                     initial_centroids[index_cluster][1], new_clusters[index_cluster][1]))
 
             temp_dist = sum(results)
 
-            print("Temp Dist {0}".format(temp_dist))
             for iK in range(len(new_clusters)):
                 initial_centroids[iK] = (
                     new_clusters[iK][0], new_clusters[iK][1])
 
-            # print(initial_centroids)
-
+        end = time.time()
+        print("Time {0}".format(end-start))
         return cluster_stats
 
 

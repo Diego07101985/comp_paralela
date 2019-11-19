@@ -1,8 +1,11 @@
-# Mineração Textos
+# Computação Paralela
 
 
 ##  Importante
-Criar um programa para extrair arquivos de um pdf
+- Explicar K means 
+- Utilizar o modelo para a detecção de similaridade de documentos baseado em agrupamentos
+- Utilizar paralelismos para aumentar a performance do modelo de algoritmo 
+
 Necessário python 3. Caso não tenha o nltk é necessário fazer o dowload.
 
 ```import nltk```  
@@ -17,19 +20,18 @@ No / do diretorio mestrado_cefet  execute os comandos:
 
 ```make install```  
 
+Este comando sera executado para executar os comandos para Spark e Sequencial:
+
 ```make run```  
 
-## Trabalho3 
+Este comando sera executado para executar o MPI:
 
-Neste trabalho executamos duas tarefas
+```make run-mpi```  
 
-- Tópico 1 - Matriz TF * IDF (Base curto)
-   -  Matriz TF (formula em log)
-   -  Matriz IDF
-   -  Matriz TF * IDF 
-   -  Criar PDF(Resultados não cabem em um pdf, por isso o csv)
-   -  Criar CSV 
-- Tópico 2 - Busca dos 10 documentos mais relevantes com relação à query (base longo)
-   -  Cáculo da similaridade dos cossenos
-   -  Criar PDF
+
+## Datasets
+
+Dois datasets foram utilizados 20_newsgroups e longo
+- 20_newsgroups 1000 docs
+- longo 11 docs
 

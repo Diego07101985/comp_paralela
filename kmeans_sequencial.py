@@ -6,11 +6,13 @@ import random
 from scipy import spatial
 from scipy.spatial import distance
 from metrics import Metrics
+import time
+
 
 style.use('ggplot')
 
 
-class K_Means:
+class K_MeansSeq:
     def __init__(self, k):
         self.k_clusters = k
 
@@ -29,13 +31,7 @@ class K_Means:
                 count_doc += 1
                 distance_cossines.append(doc.distance_cosine)
                 total_distance_cossine += doc.distance_cosine
-            print(count_doc)
             mean = (total_distance_cossine / count_doc)
-
-            print("Centroid {0}".format(len(centroid)))
-            print("total_distance_cossine {0}".format(total_distance_cossine))
-            print("Mean {0}".format(mean))
-            print("Distances {0}".format(distance_cossines))
 
             distance_mean = distance_cossines.index(
                 min(distance_cossines, key=lambda x: abs(x - mean)))
@@ -91,10 +87,10 @@ class K_Means:
                     list_centroid[k][1].remove(doc)
 
         # posso clusterizar
-
         return list_centroid
 
     def execute(self, matriz_t_idf):
+        start = time.time()
         self.clusters = {}
         document_vectors_list = []
         document_id = 0
@@ -107,7 +103,7 @@ class K_Means:
             document_vectors_list.append((document_id, document_vector))
             document_id += 1
 
-        initial_centroids = random.sample(document_vectors_list, k=3)
+        initial_centroids = random.sample(document_vectors_list, 3)
 
         temp_dist = 1.0
         metrics = Metrics()
@@ -122,7 +118,6 @@ class K_Means:
             cluster_stats = self.closest_document(
                 document_vectors_list, initial_centroids)
 
-            # Returns the centroid cluster from the sum and count of documents in the cluster
             new_clusters = self.compute_centroids(cluster_stats)
             results = []
 
@@ -135,8 +130,8 @@ class K_Means:
 
             for ik in range(len(new_clusters)):
                 init_centroid_eu[ik] = (0, new_clusters[ik])
-
-            print("Temp = {0}".format(temp_dist))
+        end = time.time()
+        print("Time = {0}".format(end - start))
 
         return cluster_stats
 
