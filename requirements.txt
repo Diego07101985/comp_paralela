@@ -11,3 +11,4 @@ toolz
 pyspark
 psutil
 mpi4py
+dill
